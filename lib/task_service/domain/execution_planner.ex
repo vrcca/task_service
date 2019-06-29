@@ -12,12 +12,15 @@ defmodule TaskService.Domain.ExecutionPlanner do
 
   defp plan([], _all, acc), do: acc
 
+  defp plan([dep | rest], all, acc) when not is_map(dep) do
+    plan(rest, all, plan_task(all[dep], all, acc))
+  end
+
   defp plan([task | rest], all, acc) do
     plan(rest, all, plan_task(task, all, acc))
   end
 
   defp plan_task(task = %{dependencies: deps}, all, acc) when is_list(deps) do
-    deps = Enum.map(deps, fn dep -> all[dep] end)
     plan_task(Map.delete(task, :dependencies), all, plan(deps, all, acc))
   end
 
