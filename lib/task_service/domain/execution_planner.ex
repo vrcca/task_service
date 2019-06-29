@@ -1,23 +1,29 @@
 defmodule TaskService.Domain.ExecutionPlanner do
   def create(tasks) do
-    acc = %{tasks: create_map(tasks), plans: [], visited: %{}}
+    acc = %{tasks: create_task_map(tasks), plans: [], visited: %{}, seen: %{}}
 
     plan(tasks, acc)
     |> Map.get(:plans)
     |> Enum.reverse()
   end
 
-  defp create_map(tasks) do
-    Enum.reduce(tasks, %{}, fn task, acc -> Map.put(acc, task.name, task) end)
+  defp create_task_map(tasks) do
+    Enum.reduce(tasks, %{}, fn task, acc ->
+      Map.put(acc, task.name, task)
+    end)
   end
 
   defp plan([], acc), do: acc
 
-  defp plan([dep | rest], acc = %{tasks: tasks}) when not is_map(dep) do
-    plan(rest, plan_task(tasks[dep], acc))
+  defp plan([task = %{name: name} | rest], acc) when is_map(task) do
+    acc = put_in(acc, [:seen, name], true)
+    plan(rest, plan_task(task, acc))
   end
 
-  defp plan([task | rest], acc) do
+  defp plan([dependency | rest], acc = %{tasks: tasks}) do
+    check_cycle!(acc, dependency)
+    acc = put_in(acc, [:seen, dependency], true)
+    task = tasks[dependency]
     plan(rest, plan_task(task, acc))
   end
 
@@ -27,13 +33,21 @@ defmodule TaskService.Domain.ExecutionPlanner do
     plan_task(task_only, planned_deps)
   end
 
-  defp plan_task(task = %{}, acc = %{visited: visited}) do
-    unless Map.has_key?(visited, task) do
-      acc
-      |> put_in([:visited, task], true)
-      |> update_in([:plans], &[task | &1])
-    else
-      acc
+  defp plan_task(task = %{name: name}, acc = %{visited: visited}) do
+    cond do
+      not Map.has_key?(visited, name) ->
+        acc
+        |> put_in([:visited, name], true)
+        |> update_in([:plans], &[task | &1])
+
+      true ->
+        acc
+    end
+  end
+
+  defp check_cycle!(%{visited: visited, seen: seen}, name) do
+    if not Map.has_key?(visited, name) and Map.has_key?(seen, name) do
+      raise ArgumentError, message: "Cyclic dependencies are not allowed!"
     end
   end
 end

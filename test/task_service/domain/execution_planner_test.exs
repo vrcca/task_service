@@ -17,8 +17,14 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   end
 
   test "returns same order when tasks does not contain dependencies" do
-    task1 = a_task("tmp")
-    task2 = a_task("rm")
+    task1 =
+      a_task("tmp")
+      |> Map.delete(:dependencies)
+
+    task2 =
+      a_task("rm")
+      |> Map.delete(:dependencies)
+
     tasks = [task1, task2]
     [plan1, plan2] = ExecutionPlanner.create(tasks)
     assert task1 |> no_dependencies() == plan1
@@ -34,7 +40,7 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     assert plan2.name == "task1"
   end
 
-  test "longer dependencies" do
+  test "mixed dependencies" do
     task1 = a_task("task1")
     task2 = a_task("task2", dependencies: ["task3"])
     task3 = a_task("task3", dependencies: ["task1"])
@@ -59,6 +65,16 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     assert plan2.name == "task3"
     assert plan3.name == "task2"
     assert plan4.name == "task1"
+  end
+
+  test "does not allow circular dependencies" do
+    task1 = a_task("task1", dependencies: ["task2"])
+    task2 = a_task("task2", dependencies: ["task1"])
+    tasks = [task1, task2]
+
+    assert_raise ArgumentError, fn ->
+      ExecutionPlanner.create(tasks)
+    end
   end
 
   defp no_dependencies(task), do: task |> Map.delete(:dependencies)
