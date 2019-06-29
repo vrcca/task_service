@@ -10,25 +10,28 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   end
 
   test "returns one command when there is only a task" do
-    tasks = [a_task("tmp")]
-
-    plan = ExecutionPlanner.create(tasks)
-    assert ^tasks = plan
+    task1 = a_task("tmp")
+    tasks = [task1]
+    [plan1] = ExecutionPlanner.create(tasks)
+    assert task1 |> no_dependencies() == plan1
   end
 
   test "returns same order when tasks does not contain dependencies" do
-    tasks = [a_task("tmp"), a_task("rm")]
-    plan = ExecutionPlanner.create(tasks)
-    assert ^tasks = plan
+    task1 = a_task("tmp")
+    task2 = a_task("rm")
+    tasks = [task1, task2]
+    [plan1, plan2] = ExecutionPlanner.create(tasks)
+    assert task1 |> no_dependencies() == plan1
+    assert task2 |> no_dependencies() == plan2
   end
 
-  test "returns second task at first position due to first task depending on it" do
-    first_task = a_task("rm", dependencies: ["touch"])
-    second_task = a_task("touch")
-    tasks = [first_task, second_task]
-    [first_in_plan, second_in_plan] = ExecutionPlanner.create(tasks)
-    assert first_in_plan.name == "touch"
-    assert second_in_plan.name == "rm"
+  test "returns task2 as first plan due to task1 depending on it" do
+    task1 = a_task("task1", dependencies: ["task2"])
+    task2 = a_task("task2")
+    tasks = [task1, task2]
+    [plan1, plan2] = ExecutionPlanner.create(tasks)
+    assert plan1.name == "task2"
+    assert plan2.name == "task1"
   end
 
   test "longer dependencies" do
@@ -57,4 +60,6 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     assert plan3.name == "task2"
     assert plan4.name == "task1"
   end
+
+  defp no_dependencies(task), do: task |> Map.delete(:dependencies)
 end
