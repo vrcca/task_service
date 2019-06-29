@@ -4,21 +4,21 @@ defmodule TaskService.Domain.ExecutionPlanner do
       tasks
       |> Enum.reduce(%{}, fn task, acc -> Map.put(acc, task.name, task) end)
 
-    {acc, _visited} = visit(tasks, all, {[], %{}})
-
-    acc
+    tasks
+    |> plan(all, {[], %{}})
+    |> elem(0)
     |> Enum.reverse()
   end
 
-  defp visit([], _all, acc), do: acc
+  defp plan([], _all, acc), do: acc
 
-  defp visit([task | rest], all, acc) do
-    visit(rest, all, plan_task(task, all, acc))
+  defp plan([task | rest], all, acc) do
+    plan(rest, all, plan_task(task, all, acc))
   end
 
   defp plan_task(task = %{dependencies: deps}, all, acc) when is_list(deps) do
     deps = Enum.map(deps, fn dep -> all[dep] end)
-    plan_task(Map.delete(task, :dependencies), all, visit(deps, all, acc))
+    plan_task(Map.delete(task, :dependencies), all, plan(deps, all, acc))
   end
 
   defp plan_task(task = %{}, _all, {acc, visited}) do
