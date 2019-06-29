@@ -8,23 +8,19 @@ defmodule TaskService.Domain.Node do
   end
 
   def visit(nodes) do
-    {acc, _visited} = visit(nodes, {[], %{}})
-
-    acc
+    visit(nodes, {[], %{}})
+    |> elem(0)
     |> Enum.reverse()
   end
 
   defp visit([], acc), do: acc
 
   defp visit([node | rest], acc) do
-    updated_acc = visit(node, acc)
-    visit(rest, updated_acc)
+    visit(rest, visit(node, acc))
   end
 
   defp visit(node = %Node{edges: edges}, acc) do
-    acc = visit(edges, acc)
-    node_only = Map.delete(node, :edges)
-    visit(node_only, acc)
+    visit(Map.delete(node, :edges), visit(edges, acc))
   end
 
   defp visit(%Node{value: value}, {acc, visited}) do

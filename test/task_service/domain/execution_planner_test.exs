@@ -1,5 +1,5 @@
 defmodule TaskService.Domain.ExecutionPlannerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias TaskService.Domain.ExecutionPlanner
   import Fixtures
 
