@@ -1,6 +1,6 @@
-defmodule TaskService.ExecutionPlannerTest do
+defmodule TaskService.Domain.ExecutionPlannerTest do
   use ExUnit.Case
-  alias TaskService.ExecutionPlanner
+  alias TaskService.Domain.ExecutionPlanner
   import Fixtures
 
   test "empty tasks returns empty plan" do

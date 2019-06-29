@@ -1,4 +1,4 @@
-defmodule TaskService.ExecutionPlanner do
+defmodule TaskService.Domain.ExecutionPlanner do
   alias TaskService.Domain.Node
 
   def create(tasks) do
