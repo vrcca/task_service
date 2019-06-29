@@ -44,4 +44,17 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     assert plan3.name == "task2"
     assert plan4.name == "task4"
   end
+
+  test "follows dependencies to the end" do
+    task1 = a_task("task1", dependencies: ["task2"])
+    task2 = a_task("task2", dependencies: ["task3"])
+    task3 = a_task("task3", dependencies: ["task4"])
+    task4 = a_task("task4")
+    tasks = [task1, task2, task3, task4]
+    [plan1, plan2, plan3, plan4] = ExecutionPlanner.create(tasks)
+    assert plan1.name == "task4"
+    assert plan2.name == "task3"
+    assert plan3.name == "task2"
+    assert plan4.name == "task1"
+  end
 end
