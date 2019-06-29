@@ -1,36 +1,39 @@
 defmodule TaskService.Domain.ExecutionPlanner do
   def create(tasks) do
-    all =
-      tasks
-      |> Enum.reduce(%{}, fn task, acc -> Map.put(acc, task.name, task) end)
+    acc = %{tasks: create_map(tasks), plans: [], visited: %{}}
 
-    tasks
-    |> plan(all, {[], %{}})
-    |> elem(0)
+    plan(tasks, acc)
+    |> Map.get(:plans)
     |> Enum.reverse()
   end
 
-  defp plan([], _all, acc), do: acc
-
-  defp plan([dep | rest], all, acc) when not is_map(dep) do
-    plan(rest, all, plan_task(all[dep], all, acc))
+  defp create_map(tasks) do
+    Enum.reduce(tasks, %{}, fn task, acc -> Map.put(acc, task.name, task) end)
   end
 
-  defp plan([task | rest], all, acc) do
-    plan(rest, all, plan_task(task, all, acc))
+  defp plan([], acc), do: acc
+
+  defp plan([dep | rest], acc = %{tasks: tasks}) when not is_map(dep) do
+    plan(rest, plan_task(tasks[dep], acc))
   end
 
-  defp plan_task(task = %{dependencies: deps}, all, acc) when is_list(deps) do
-    plan_task(Map.delete(task, :dependencies), all, plan(deps, all, acc))
+  defp plan([task | rest], acc) do
+    plan(rest, plan_task(task, acc))
   end
 
-  defp plan_task(task = %{}, _all, {acc, visited}) do
+  defp plan_task(task = %{dependencies: deps}, acc) when is_list(deps) do
+    planned_deps = plan(deps, acc)
+    task_only = Map.delete(task, :dependencies)
+    plan_task(task_only, planned_deps)
+  end
+
+  defp plan_task(task = %{}, acc = %{visited: visited}) do
     unless Map.has_key?(visited, task) do
-      visited = Map.put(visited, task, true)
-      acc = [task | acc]
-      {acc, visited}
+      acc
+      |> put_in([:visited, task], true)
+      |> update_in([:plans], &[task | &1])
     else
-      {acc, visited}
+      acc
     end
   end
 end
