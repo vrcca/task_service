@@ -1,10 +1,10 @@
 defmodule TaskService.Domain.Node do
   alias TaskService.Domain.Node
 
-  defstruct root: nil, edges: []
+  defstruct value: nil, edges: []
 
-  def new(root, edges \\ []) do
-    %Node{root: root, edges: edges}
+  def new(value, edges \\ []) do
+    %Node{value: value, edges: edges}
   end
 
   def visit(nodes) do
@@ -21,15 +21,16 @@ defmodule TaskService.Domain.Node do
     visit(rest, updated_acc)
   end
 
-  defp visit(node = %Node{root: _root, edges: edges}, acc) do
-    root = Map.delete(node, :edges)
-    visit(root, visit(edges, acc))
+  defp visit(node = %Node{value: _value, edges: edges}, acc) do
+    acc = visit(edges, acc)
+    node_only = Map.delete(node, :edges)
+    visit(node_only, acc)
   end
 
-  defp visit(%Node{root: root}, {acc, visited}) do
-    unless Map.has_key?(visited, root) do
-      visited = Map.put(visited, root, true)
-      acc = [root | acc]
+  defp visit(%Node{value: value}, {acc, visited}) do
+    unless Map.has_key?(visited, value) do
+      visited = Map.put(visited, value, true)
+      acc = [value | acc]
       {acc, visited}
     else
       {acc, visited}
