@@ -1,6 +1,6 @@
-defmodule TaskService.TaskExecutionTest do
+defmodule TaskService.ExecutionPlannerTest do
   use ExUnit.Case
-  alias TaskService.TaskExecution
+  alias TaskService.ExecutionPlanner
 
   test "returns one command when there is only one" do
     tasks = [
@@ -10,7 +10,7 @@ defmodule TaskService.TaskExecutionTest do
       }
     ]
 
-    execution = TaskExecution.create(tasks)
-    assert ^tasks = execution
+    plan = ExecutionPlanner.create(tasks)
+    assert ^tasks = plan
   end
 end
