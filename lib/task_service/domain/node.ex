@@ -14,16 +14,16 @@ defmodule TaskService.Domain.Node do
     |> Enum.reverse()
   end
 
-  defp visit([], {acc, visited}), do: {acc, visited}
+  defp visit([], acc), do: acc
 
-  defp visit([node | rest], {acc, visited}) do
-    {updated_acc, visited} = visit(node, {acc, visited})
-    visit(rest, {updated_acc, visited})
+  defp visit([node | rest], acc) do
+    updated_acc = visit(node, acc)
+    visit(rest, updated_acc)
   end
 
-  defp visit(node = %Node{root: _root, edges: edges}, {acc, visited}) do
-    result = visit(edges, {acc, visited})
-    visit(Map.delete(node, :edges), result)
+  defp visit(node = %Node{root: _root, edges: edges}, acc) do
+    root = Map.delete(node, :edges)
+    visit(root, visit(edges, acc))
   end
 
   defp visit(%Node{root: root}, {acc, visited}) do
