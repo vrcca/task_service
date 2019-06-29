@@ -21,7 +21,7 @@ defmodule TaskService.Domain.Node do
     visit(rest, updated_acc)
   end
 
-  defp visit(node = %Node{value: _value, edges: edges}, acc) do
+  defp visit(node = %Node{edges: edges}, acc) do
     acc = visit(edges, acc)
     node_only = Map.delete(node, :edges)
     visit(node_only, acc)

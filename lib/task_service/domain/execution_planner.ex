@@ -9,11 +9,10 @@ defmodule TaskService.Domain.ExecutionPlanner do
     nodes =
       tasks
       |> Enum.map(fn task ->
-        deps = Enum.map(task.dependencies, fn dep -> Node.new(dep) end)
-        Node.new(task.name, deps)
+        deps = Enum.map(task.dependencies, fn dep -> Node.new(Map.get(all, dep)) end)
+        Node.new(task, deps)
       end)
 
     Node.visit(nodes)
-    |> Enum.map(fn name -> Map.get(all, name) end)
   end
 end
