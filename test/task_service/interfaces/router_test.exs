@@ -13,14 +13,15 @@ defmodule TaskService.Interfaces.RouterTest do
     assert %Plug.Conn{status: 404} = conn
   end
 
-  test "POST /plans returns bash script" do
+  test "POST /plans returns bash script for text/plain" do
     task1 = a_task("task-1", command: "touch /tmp/file1")
     tasks = %{tasks: [task1]}
 
     conn =
       :post
       |> conn("/plans", to_json(tasks))
-      |> put_req_header("content-type", "application/x-www-form-urlencoded")
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("accept", "text/plain")
       |> Router.call(@opts)
 
     assert %Plug.Conn{status: 201} = conn
@@ -32,5 +33,21 @@ defmodule TaskService.Interfaces.RouterTest do
            """
   end
 
-  defp to_json(body), do: Poison.encode!(body)
+  test "POST /plans returns JSON by default" do
+    task1 = a_task("task-1", command: "touch /tmp/file1")
+    tasks = %{tasks: [task1]}
+
+    conn =
+      :post
+      |> conn("/plans", to_json(tasks))
+      |> put_req_header("content-type", "application/json")
+      |> Router.call(@opts)
+
+    assert %Plug.Conn{status: 201} = conn
+
+    assert conn.resp_body == to_json([with_no_dependencies(task1)])
+  end
+
+  defp to_json(body), do: Jason.encode!(body)
+  defp with_no_dependencies(task), do: Map.delete(task, :dependencies)
 end

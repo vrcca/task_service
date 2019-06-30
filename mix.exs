@@ -24,7 +24,7 @@ defmodule TaskService.MixProject do
 
   defp deps do
     [
-      {:poison, "~> 3.1"},
+      {:jason, "~> 1.1"},
       {:plug_cowboy, "~> 2.0"}
     ]
   end

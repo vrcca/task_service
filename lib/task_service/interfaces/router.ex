@@ -9,9 +9,9 @@ defmodule TaskService.Interfaces.Router do
   plug(:match)
 
   plug(Plug.Parsers,
-    parsers: [:urlencoded, :json],
-    pass: ["application/*"],
-    json_decoder: Poison
+    parsers: [:json],
+    pass: ["application/json"],
+    json_decoder: Jason
   )
 
   plug(:dispatch)
@@ -19,7 +19,7 @@ defmodule TaskService.Interfaces.Router do
   post "/plans" do
     tasks =
       conn
-      |> parse_body()
+      |> Map.get(:body_params)
       |> Map.get("tasks")
       |> Enum.map(&to_domain/1)
 
@@ -31,20 +31,28 @@ defmodule TaskService.Interfaces.Router do
     |> send_resp(201, body)
   end
 
-  defp parse_body(%{body_params: body}) do
-    [urlencoded_body | _rest] = body |> Map.keys()
-    Poison.decode!(urlencoded_body)
-  end
+  defp to_response(plan, conn = %Plug.Conn{}) do
+    plain =
+      get_req_header(conn, "accept")
+      |> Enum.any?(fn header ->
+        String.downcase(header) == "text/plain"
+      end)
 
-  defp to_response(plan, _conn) do
-    """
-    #!/usr/bin/env bash
-
-    #{to_bash(plan)}
-    """
+    case plain do
+      true -> to_bash(plan)
+      false -> Jason.encode!(plan)
+    end
   end
 
   defp to_bash(plan) do
+    """
+    #!/usr/bin/env bash
+
+    #{to_bash_tasks(plan)}
+    """
+  end
+
+  defp to_bash_tasks(plan) do
     plan
     |> Stream.map(fn task -> task.command end)
     |> Enum.join("\n")
