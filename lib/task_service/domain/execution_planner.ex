@@ -16,14 +16,13 @@ defmodule TaskService.Domain.ExecutionPlanner do
   defp plan([], acc), do: acc
 
   defp plan([task = %{name: name} | rest], acc) when is_map(task) do
-    acc = put_in(acc, [:seen, name], true)
+    acc = check_cycle!(acc, name)
     plan(rest, plan_task(task, acc))
   end
 
   defp plan([dependency | rest], acc = %{tasks: tasks}) do
-    check_cycle!(acc, dependency)
-    acc = put_in(acc, [:seen, dependency], true)
-    task = tasks[dependency]
+    acc = check_cycle!(acc, dependency)
+    task = retrieve_task_by_name!(tasks, dependency)
     plan(rest, plan_task(task, acc))
   end
 
@@ -45,9 +44,18 @@ defmodule TaskService.Domain.ExecutionPlanner do
     end
   end
 
-  defp check_cycle!(%{visited: visited, seen: seen}, name) do
+  defp check_cycle!(acc = %{visited: visited, seen: seen}, name) do
     if not Map.has_key?(visited, name) and Map.has_key?(seen, name) do
-      raise ArgumentError, message: "Cyclic dependencies are not allowed!"
+      raise ArgumentError, message: "Cyclic dependencies are not allowed! See: '#{name}'"
+    end
+
+    put_in(acc, [:seen, name], true)
+  end
+
+  defp retrieve_task_by_name!(tasks, name) do
+    case Map.get(tasks, name) do
+      nil -> raise ArgumentError, message: "Missing dependency '#{name}'"
+      task -> task
     end
   end
 end

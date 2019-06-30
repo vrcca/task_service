@@ -72,7 +72,28 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     task2 = a_task("task2", dependencies: ["task1"])
     tasks = [task1, task2]
 
-    assert_raise ArgumentError, fn ->
+    assert_raise ArgumentError, "Cyclic dependencies are not allowed! See: 'task1'", fn ->
+      ExecutionPlanner.create(tasks)
+    end
+  end
+
+  test "does not allow deep circular dependencies" do
+    task1 = a_task("task1", dependencies: ["task2"])
+    task2 = a_task("task2", dependencies: ["task3"])
+    task3 = a_task("task3", dependencies: ["task4"])
+    task4 = a_task("task4", dependencies: ["task1"])
+    tasks = [task1, task2, task3, task4]
+
+    assert_raise ArgumentError, "Cyclic dependencies are not allowed! See: 'task1'", fn ->
+      ExecutionPlanner.create(tasks)
+    end
+  end
+
+  test "does not allow missing dependencies" do
+    task1 = a_task("task1", dependencies: ["task2"])
+    tasks = [task1]
+
+    assert_raise ArgumentError, "Missing dependency 'task2'", fn ->
       ExecutionPlanner.create(tasks)
     end
   end
