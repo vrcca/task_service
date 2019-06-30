@@ -2,19 +2,13 @@ defmodule TaskService.Domain.ExecutionPlanner do
   alias TaskService.Domain.PlanChecker
 
   def create(tasks) do
-    acc = %{tasks: create_task_map(tasks), plan: [], processed: %{}, seen: %{}}
+    acc = %{tasks: tasks |> to_map(), plan: [], processed: %{}, seen: %{}}
 
     plan(tasks, acc)
     |> case do
       %{error: reason} -> {:error, reason}
       %{plan: plan} -> Enum.reverse(plan)
     end
-  end
-
-  defp create_task_map(tasks) do
-    Enum.reduce(tasks, %{}, fn task, acc ->
-      Map.put(acc, task.name, task)
-    end)
   end
 
   defp plan([], acc), do: acc
@@ -49,4 +43,8 @@ defmodule TaskService.Domain.ExecutionPlanner do
 
   defp get_task(_acc, task = %{}), do: task
   defp get_task(%{tasks: tasks}, name), do: tasks[name]
+
+  defp to_map(tasks) do
+    Enum.into(tasks, %{}, fn task -> {task.name, task} end)
+  end
 end
