@@ -2,6 +2,7 @@ defmodule TaskService.Interfaces.RouterTest do
   use ExUnit.Case, async: true
   use Plug.Test
 
+  import Fixtures
   alias TaskService.Interfaces.Router
 
   @opts Router.init([])
@@ -11,4 +12,25 @@ defmodule TaskService.Interfaces.RouterTest do
     conn = Router.call(conn, @opts)
     assert %Plug.Conn{status: 404} = conn
   end
+
+  test "POST /plans returns bash script" do
+    task1 = a_task("task-1", command: "touch /tmp/file1")
+    tasks = [task1]
+
+    conn =
+      :post
+      |> conn("/plans", to_json(tasks))
+      |> put_req_header("content-type", "application/json")
+      |> Router.call(@opts)
+
+    assert %Plug.Conn{status: 201} = conn
+
+    assert conn.resp_body == """
+           #!/usr/bin/env bash
+
+           #{task1.command}
+           """
+  end
+
+  defp to_json(body), do: Poison.encode!(body)
 end
