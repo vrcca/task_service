@@ -11,4 +11,4 @@
 
 I decided to call the endpoints as `/plans`, because you "create" an execution plan when you pass the tasks to `POST /plans`. Thus, returning the execution plan to the user.
 
-The `/plans` endpoint decides the response type based on `accept`, otherwise `content-type`.
+The `/plans` endpoint decides the response type based on `accept`, otherwise returns json. Therefore, the bash script needs to pass `Accept: text/plain` as request header.
