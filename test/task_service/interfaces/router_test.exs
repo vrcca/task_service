@@ -57,6 +57,7 @@ defmodule TaskService.Interfaces.RouterTest do
       |> Router.call(@opts)
 
     assert conn.status == 400
+    assert conn.resp_body =~ "nil task list"
   end
 
   test "POST /plans returns 400 for invalid tasks" do
@@ -69,6 +70,7 @@ defmodule TaskService.Interfaces.RouterTest do
       |> Router.call(@opts)
 
     assert conn.status == 400
+    assert conn.resp_body =~ "Task is missing"
   end
 
   defp to_json(body), do: Jason.encode!(body)
