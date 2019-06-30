@@ -19,11 +19,11 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   test "returns same order when tasks does not contain dependencies" do
     task1 =
       a_task("tmp")
-      |> Map.delete(:dependencies)
+      |> Map.delete(:requires)
 
     task2 =
       a_task("rm")
-      |> Map.delete(:dependencies)
+      |> Map.delete(:requires)
 
     tasks = [task1, task2]
     [plan1, plan2] = ExecutionPlanner.create(tasks)
@@ -32,7 +32,7 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   end
 
   test "returns task2 as first plan due to task1 depending on it" do
-    task1 = a_task("task1", dependencies: ["task2"])
+    task1 = a_task("task1", requires: ["task2"])
     task2 = a_task("task2")
     tasks = [task1, task2]
     [plan1, plan2] = ExecutionPlanner.create(tasks)
@@ -42,9 +42,9 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
 
   test "mixed dependencies" do
     task1 = a_task("task1")
-    task2 = a_task("task2", dependencies: ["task3"])
-    task3 = a_task("task3", dependencies: ["task1"])
-    task4 = a_task("task4", dependencies: ["task2", "task3"])
+    task2 = a_task("task2", requires: ["task3"])
+    task3 = a_task("task3", requires: ["task1"])
+    task4 = a_task("task4", requires: ["task2", "task3"])
 
     tasks = [task1, task2, task3, task4]
     [plan1, plan2, plan3, plan4] = ExecutionPlanner.create(tasks)
@@ -55,9 +55,9 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   end
 
   test "follows dependencies to the end" do
-    task1 = a_task("task1", dependencies: ["task2"])
-    task2 = a_task("task2", dependencies: ["task3"])
-    task3 = a_task("task3", dependencies: ["task4"])
+    task1 = a_task("task1", requires: ["task2"])
+    task2 = a_task("task2", requires: ["task3"])
+    task3 = a_task("task3", requires: ["task4"])
     task4 = a_task("task4")
     tasks = [task1, task2, task3, task4]
     [plan1, plan2, plan3, plan4] = ExecutionPlanner.create(tasks)
@@ -68,8 +68,8 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   end
 
   test "does not allow circular dependencies" do
-    task1 = a_task("task1", dependencies: ["task2"])
-    task2 = a_task("task2", dependencies: ["task1"])
+    task1 = a_task("task1", requires: ["task2"])
+    task2 = a_task("task2", requires: ["task1"])
     tasks = [task1, task2]
 
     assert {:error, reason} = ExecutionPlanner.create(tasks)
@@ -77,10 +77,10 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   end
 
   test "does not allow deep circular dependencies" do
-    task1 = a_task("task1", dependencies: ["task2"])
-    task2 = a_task("task2", dependencies: ["task3"])
-    task3 = a_task("task3", dependencies: ["task4"])
-    task4 = a_task("task4", dependencies: ["task1"])
+    task1 = a_task("task1", requires: ["task2"])
+    task2 = a_task("task2", requires: ["task3"])
+    task3 = a_task("task3", requires: ["task4"])
+    task4 = a_task("task4", requires: ["task1"])
     tasks = [task1, task2, task3, task4]
 
     assert {:error, reason} = ExecutionPlanner.create(tasks)
@@ -88,12 +88,12 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
   end
 
   test "does not allow missing dependencies" do
-    task1 = a_task("task1", dependencies: ["task2"])
+    task1 = a_task("task1", requires: ["task2"])
     tasks = [task1]
 
     assert {:error, reason} = ExecutionPlanner.create(tasks)
     assert reason == "Missing dependency 'task2'"
   end
 
-  defp no_dependencies(task), do: task |> Map.delete(:dependencies)
+  defp no_dependencies(task), do: task |> Map.delete(:requires)
 end

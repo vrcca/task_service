@@ -1,12 +1,12 @@
 defmodule Fixtures do
   def a_task(name, opts \\ []) do
-    dependencies = Keyword.get(opts, :dependencies) || []
+    requires = Keyword.get(opts, :requires) || []
     opts = Enum.into(opts, %{})
 
     task = %{
       name: name,
       command: "touch /tmp/#{name}",
-      dependencies: dependencies
+      requires: requires
     }
 
     Map.merge(task, opts)

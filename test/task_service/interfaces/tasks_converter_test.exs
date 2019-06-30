@@ -29,7 +29,7 @@ defmodule TaskService.Interfaces.TasksConverterTest do
   end
 
   test "dependencies are translated" do
-    task1 = a_task("task1", dependencies: ["task2"])
+    task1 = a_task("task1", requires: ["task2"])
     task2 = a_task("task2")
     tasks = [task1, task2]
 

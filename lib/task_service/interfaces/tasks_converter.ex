@@ -17,8 +17,8 @@ defmodule TaskService.Interfaces.TasksConverter do
   defp to_domain([], acc), do: acc
 
   defp to_domain([task = %{"name" => name, "command" => command} | rest], acc) do
-    dependencies = Map.get(task, "dependencies", [])
-    converted_task = %{name: name, command: command, dependencies: dependencies}
+    dependencies = Map.get(task, "requires", [])
+    converted_task = %{name: name, command: command, requires: dependencies}
     to_domain(rest, [converted_task | acc])
   end
 

@@ -74,8 +74,8 @@ defmodule TaskService.Interfaces.RouterTest do
   end
 
   test "POST /plans returns 400 for cyclic dependencies" do
-    task1 = a_task("task-1", dependencies: ["task-2"])
-    task2 = a_task("task-2", dependencies: ["task-1"])
+    task1 = a_task("task-1", requires: ["task-2"])
+    task2 = a_task("task-2", requires: ["task-1"])
     tasks = %{tasks: [task1, task2]}
 
     conn =
@@ -89,7 +89,7 @@ defmodule TaskService.Interfaces.RouterTest do
   end
 
   defp to_json(body), do: Jason.encode!(body)
-  defp with_no_dependencies(task), do: Map.delete(task, :dependencies)
+  defp with_no_dependencies(task), do: Map.delete(task, :requires)
 
   defp put_json_header(conn) do
     conn

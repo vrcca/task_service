@@ -23,10 +23,10 @@ defmodule TaskService.Domain.ExecutionPlanner do
 
   defp plan_task(_task, acc = %{error: _reason}), do: acc
 
-  defp plan_task(task = %{dependencies: deps}, acc) when is_list(deps) do
-    planned_deps = plan(deps, acc)
-    task_only = Map.delete(task, :dependencies)
-    plan_task(task_only, planned_deps)
+  defp plan_task(task = %{requires: dependencies}, acc) when is_list(dependencies) do
+    planned_dependencies = plan(dependencies, acc)
+    task_only = Map.delete(task, :requires)
+    plan_task(task_only, planned_dependencies)
   end
 
   defp plan_task(task = %{name: name}, acc = %{processed: processed}) do
