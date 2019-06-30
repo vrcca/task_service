@@ -1,25 +1,27 @@
 defmodule TaskService.Domain.PlanChecker do
-  def check(acc, %{name: name}), do: check_cycle(acc, name)
+  def check(plan, _task = %{name: name}), do: check_cycle(plan, name)
 
-  def check(acc, dependency) when not is_map(dependency) do
-    acc
+  def check(plan, dependency) when not is_map(dependency) do
+    plan
     |> check_dependency(dependency)
     |> check_cycle(dependency)
   end
 
-  defp check_cycle(acc = %{processed: processed, seen: seen}, name) do
-    has_cycle = (!processed[name] and seen[name]) || false
+  defp check_cycle(plan = %{error: _reason}, _task), do: plan
+
+  defp check_cycle(plan = %{processed: processed, seen: seen}, task) do
+    has_cycle = (!processed[task] and seen[task]) || false
 
     case has_cycle do
-      true -> Map.put(acc, :error, "Cyclic dependency found at '#{name}'")
-      false -> put_in(acc, [:seen, name], true)
+      true -> Map.put(plan, :error, "Cyclic dependency found at '#{task}'")
+      _ -> put_in(plan, [:seen, task], true)
     end
   end
 
-  defp check_dependency(acc = %{tasks: tasks}, name) do
-    case Map.has_key?(tasks, name) do
-      false -> Map.put(acc, :error, "Missing dependency '#{name}'")
-      true -> acc
+  defp check_dependency(plan = %{tasks: tasks}, task) do
+    cond do
+      not Map.has_key?(tasks, task) -> Map.put(plan, :error, "Missing dependency '#{task}'")
+      true -> plan
     end
   end
 end
