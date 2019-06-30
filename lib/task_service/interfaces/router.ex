@@ -21,15 +21,32 @@ defmodule TaskService.Interfaces.Router do
       conn
       |> Map.get(:body_params)
       |> Map.get("tasks")
-      |> Enum.map(&to_domain/1)
-
-    body =
-      TaskService.Domain.ExecutionPlanner.create(tasks)
+      |> process()
       |> to_response(conn)
 
     conn
+    |> respond(tasks)
+  end
+
+  defp process(nil), do: {:error, 400, "No 'tasks' list found."}
+
+  defp process(tasks) do
+    tasks
+    |> Enum.map(&to_domain/1)
+    |> TaskService.Domain.ExecutionPlanner.create()
+  end
+
+  defp respond(conn, {:error, code, reason}) do
+    conn
+    |> send_resp(code, reason)
+  end
+
+  defp respond(conn, body) do
+    conn
     |> send_resp(201, body)
   end
+
+  defp to_response(error = {:error, _code, _reason}, _conn), do: error
 
   defp to_response(plan, conn = %Plug.Conn{}) do
     plain =

@@ -10,7 +10,7 @@ defmodule TaskService.Interfaces.RouterTest do
   test "returns 404 for unknown routes" do
     conn = conn(:get, "/unknown-route")
     conn = Router.call(conn, @opts)
-    assert %Plug.Conn{status: 404} = conn
+    assert conn.status == 404
   end
 
   test "POST /plans returns bash script for text/plain" do
@@ -24,7 +24,7 @@ defmodule TaskService.Interfaces.RouterTest do
       |> put_req_header("accept", "text/plain")
       |> Router.call(@opts)
 
-    assert %Plug.Conn{status: 201} = conn
+    assert conn.status == 201
 
     assert conn.resp_body == """
            #!/usr/bin/env bash
@@ -43,9 +43,19 @@ defmodule TaskService.Interfaces.RouterTest do
       |> put_req_header("content-type", "application/json")
       |> Router.call(@opts)
 
-    assert %Plug.Conn{status: 201} = conn
-
+    assert conn.status == 201
     assert conn.resp_body == to_json([with_no_dependencies(task1)])
+  end
+
+  test "POST /plans returns 400 for bad requests" do
+    tasks = %{missing_root_tasks_property: []}
+
+    conn =
+      :post
+      |> conn("/plans", to_json(tasks))
+      |> Router.call(@opts)
+
+    assert conn.status == 400
   end
 
   defp to_json(body), do: Jason.encode!(body)
