@@ -1,5 +1,6 @@
 defmodule TaskService.Interfaces.Router do
   use Plug.Router
+  alias TaskService.Interfaces.TasksConverter
 
   if Mix.env() == :dev do
     use Plug.Debugger
@@ -21,6 +22,7 @@ defmodule TaskService.Interfaces.Router do
       conn
       |> Map.get(:body_params)
       |> Map.get("tasks")
+      |> TasksConverter.to_domain()
       |> process()
       |> to_response(conn)
 
@@ -28,17 +30,16 @@ defmodule TaskService.Interfaces.Router do
     |> respond(tasks)
   end
 
-  defp process(nil), do: {:error, 400, "No 'tasks' list found."}
+  defp process(error = {:error, _reason}), do: error
 
   defp process(tasks) do
     tasks
-    |> Enum.map(&to_domain/1)
     |> TaskService.Domain.ExecutionPlanner.create()
   end
 
-  defp respond(conn, {:error, code, reason}) do
+  defp respond(conn, {:error, reason}) do
     conn
-    |> send_resp(code, reason)
+    |> send_resp(400, reason)
   end
 
   defp respond(conn, body) do
@@ -46,7 +47,7 @@ defmodule TaskService.Interfaces.Router do
     |> send_resp(201, body)
   end
 
-  defp to_response(error = {:error, _code, _reason}, _conn), do: error
+  defp to_response(error = {:error, _reason}, _conn), do: error
 
   defp to_response(plan, conn = %Plug.Conn{}) do
     plain =
@@ -73,12 +74,6 @@ defmodule TaskService.Interfaces.Router do
     plan
     |> Stream.map(fn task -> task.command end)
     |> Enum.join("\n")
-  end
-
-  defp to_domain(tasks) do
-    Enum.into(tasks, %{}, fn {key, val} ->
-      {String.to_atom(key), val}
-    end)
   end
 
   match _ do

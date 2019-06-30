@@ -20,7 +20,7 @@ defmodule TaskService.Interfaces.RouterTest do
     conn =
       :post
       |> conn("/plans", to_json(tasks))
-      |> put_req_header("content-type", "application/json")
+      |> put_json_header()
       |> put_req_header("accept", "text/plain")
       |> Router.call(@opts)
 
@@ -40,7 +40,7 @@ defmodule TaskService.Interfaces.RouterTest do
     conn =
       :post
       |> conn("/plans", to_json(tasks))
-      |> put_req_header("content-type", "application/json")
+      |> put_json_header()
       |> Router.call(@opts)
 
     assert conn.status == 201
@@ -53,6 +53,19 @@ defmodule TaskService.Interfaces.RouterTest do
     conn =
       :post
       |> conn("/plans", to_json(tasks))
+      |> put_json_header()
+      |> Router.call(@opts)
+
+    assert conn.status == 400
+  end
+
+  test "POST /plans returns 400 for invalid tasks" do
+    tasks = %{tasks: [%{naem: "task1", command: "tmp"}]}
+
+    conn =
+      :post
+      |> conn("/plans", to_json(tasks))
+      |> put_json_header()
       |> Router.call(@opts)
 
     assert conn.status == 400
@@ -60,4 +73,9 @@ defmodule TaskService.Interfaces.RouterTest do
 
   defp to_json(body), do: Jason.encode!(body)
   defp with_no_dependencies(task), do: Map.delete(task, :dependencies)
+
+  defp put_json_header(conn) do
+    conn
+    |> put_req_header("content-type", "application/json")
+  end
 end
