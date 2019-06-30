@@ -6,3 +6,6 @@ test:
 
 dependencies:
 	@mix local.rebar --force && mix deps.get
+
+run:
+	mix run --no-halt

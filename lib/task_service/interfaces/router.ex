@@ -9,15 +9,19 @@ defmodule TaskService.Interfaces.Router do
   plug(:match)
 
   plug(Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
-    pass: ["*/*"],
+    parsers: [:urlencoded, :json],
+    pass: ["application/*"],
     json_decoder: Poison
   )
 
   plug(:dispatch)
 
   post "/plans" do
-    tasks = conn.body_params["_json"] |> Enum.map(&to_domain/1)
+    tasks =
+      conn
+      |> parse_body()
+      |> Map.get("tasks")
+      |> Enum.map(&to_domain/1)
 
     body =
       TaskService.Domain.ExecutionPlanner.create(tasks)
@@ -25,6 +29,11 @@ defmodule TaskService.Interfaces.Router do
 
     conn
     |> send_resp(201, body)
+  end
+
+  defp parse_body(%{body_params: body}) do
+    [urlencoded_body | _rest] = body |> Map.keys()
+    Poison.decode!(urlencoded_body)
   end
 
   defp to_response(plan, _conn) do

@@ -15,12 +15,12 @@ defmodule TaskService.Interfaces.RouterTest do
 
   test "POST /plans returns bash script" do
     task1 = a_task("task-1", command: "touch /tmp/file1")
-    tasks = [task1]
+    tasks = %{tasks: [task1]}
 
     conn =
       :post
       |> conn("/plans", to_json(tasks))
-      |> put_req_header("content-type", "application/json")
+      |> put_req_header("content-type", "application/x-www-form-urlencoded")
       |> Router.call(@opts)
 
     assert %Plug.Conn{status: 201} = conn
