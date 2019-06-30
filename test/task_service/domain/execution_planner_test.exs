@@ -5,14 +5,13 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
 
   test "empty tasks returns empty plan" do
     tasks = []
-    plan = ExecutionPlanner.create(tasks)
-    assert [] == plan
+    assert {:ok, []} = ExecutionPlanner.create(tasks)
   end
 
   test "returns one command when there is only a task" do
     task1 = a_task("tmp")
     tasks = [task1]
-    [plan1] = ExecutionPlanner.create(tasks)
+    {:ok, [plan1]} = ExecutionPlanner.create(tasks)
     assert task1 |> no_dependencies() == plan1
   end
 
@@ -26,7 +25,7 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
       |> Map.delete(:requires)
 
     tasks = [task1, task2]
-    [plan1, plan2] = ExecutionPlanner.create(tasks)
+    {:ok, [plan1, plan2]} = ExecutionPlanner.create(tasks)
     assert task1 |> no_dependencies() == plan1
     assert task2 |> no_dependencies() == plan2
   end
@@ -35,7 +34,7 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     task1 = a_task("task1", requires: ["task2"])
     task2 = a_task("task2")
     tasks = [task1, task2]
-    [plan1, plan2] = ExecutionPlanner.create(tasks)
+    {:ok, [plan1, plan2]} = ExecutionPlanner.create(tasks)
     assert plan1.name == "task2"
     assert plan2.name == "task1"
   end
@@ -47,7 +46,7 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     task4 = a_task("task4", requires: ["task2", "task3"])
 
     tasks = [task1, task2, task3, task4]
-    [plan1, plan2, plan3, plan4] = ExecutionPlanner.create(tasks)
+    {:ok, [plan1, plan2, plan3, plan4]} = ExecutionPlanner.create(tasks)
     assert plan1.name == "task1"
     assert plan2.name == "task3"
     assert plan3.name == "task2"
@@ -60,7 +59,7 @@ defmodule TaskService.Domain.ExecutionPlannerTest do
     task3 = a_task("task3", requires: ["task4"])
     task4 = a_task("task4")
     tasks = [task1, task2, task3, task4]
-    [plan1, plan2, plan3, plan4] = ExecutionPlanner.create(tasks)
+    {:ok, [plan1, plan2, plan3, plan4]} = ExecutionPlanner.create(tasks)
     assert plan1.name == "task4"
     assert plan2.name == "task3"
     assert plan3.name == "task2"

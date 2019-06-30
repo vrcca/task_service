@@ -7,7 +7,7 @@ defmodule TaskService.Domain.ExecutionPlanner do
     plan(tasks, acc)
     |> case do
       %{error: reason} -> {:error, reason}
-      %{plan: plan} -> Enum.reverse(plan)
+      %{plan: plan} -> {:ok, Enum.reverse(plan)}
     end
   end
 

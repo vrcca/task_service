@@ -1,4 +1,11 @@
-defmodule TaskService.Interfaces.TasksConverter do
+defmodule TaskService.Interfaces.TasksRequestConverter do
+  def convert(conn = %Plug.Conn{}) do
+    conn
+    |> Map.get(:body_params)
+    |> Map.get("tasks")
+    |> to_domain()
+  end
+
   def to_domain(tasks) do
     tasks
     |> map_tasks_to_domain()
@@ -10,7 +17,7 @@ defmodule TaskService.Interfaces.TasksConverter do
     to_domain(tasks, [])
     |> case do
       error = {:error, _reason} -> error
-      converted_tasks -> Enum.reverse(converted_tasks)
+      converted_tasks -> {:ok, Enum.reverse(converted_tasks)}
     end
   end
 
