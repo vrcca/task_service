@@ -73,6 +73,21 @@ defmodule TaskService.Interfaces.RouterTest do
     assert conn.resp_body =~ "Task is missing"
   end
 
+  test "POST /plans returns 400 for cyclic dependencies" do
+    task1 = a_task("task-1", dependencies: ["task-2"])
+    task2 = a_task("task-2", dependencies: ["task-1"])
+    tasks = %{tasks: [task1, task2]}
+
+    conn =
+      :post
+      |> conn("/plans", to_json(tasks))
+      |> put_json_header()
+      |> Router.call(@opts)
+
+    assert conn.status == 400
+    assert conn.resp_body =~ "Cyclic dependency found"
+  end
+
   defp to_json(body), do: Jason.encode!(body)
   defp with_no_dependencies(task), do: Map.delete(task, :dependencies)
 
