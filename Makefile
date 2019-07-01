@@ -1,11 +1,16 @@
 .PHONY: test
 
+build: dependencies
+	mix compile
+
 test:
 	@mix format --check-formatted && \
 	mix test
 
 dependencies:
-	@mix local.rebar --force && mix deps.get
+	printf 'Y' | mix local.hex --if-missing && \
+	mix local.rebar --force  && \
+	mix deps.get
 
-run:
+start:
 	mix run --no-halt
