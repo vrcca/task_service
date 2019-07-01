@@ -87,12 +87,4 @@ defmodule TaskService.Interfaces.RouterTest do
     assert conn.status == 400
     assert conn.resp_body =~ "Cyclic dependency found"
   end
-
-  defp to_json(body), do: Jason.encode!(body)
-  defp with_no_dependencies(task), do: Map.delete(task, :requires)
-
-  defp put_json_header(conn) do
-    conn
-    |> put_req_header("content-type", "application/json")
-  end
 end

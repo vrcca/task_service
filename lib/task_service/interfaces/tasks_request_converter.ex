@@ -3,23 +3,14 @@ defmodule TaskService.Interfaces.TasksRequestConverter do
     conn
     |> Map.get(:body_params)
     |> Map.get("tasks")
-    |> to_domain()
-  end
-
-  def to_domain(tasks) do
-    tasks
-    |> map_tasks_to_domain()
-  end
-
-  defp map_tasks_to_domain(nil), do: {:error, "nil task list"}
-
-  defp map_tasks_to_domain(tasks) when is_list(tasks) do
-    to_domain(tasks, [])
+    |> to_domain([])
     |> case do
       error = {:error, _reason} -> error
       converted_tasks -> {:ok, Enum.reverse(converted_tasks)}
     end
   end
+
+  defp to_domain(nil, _acc), do: {:error, "nil task list"}
 
   defp to_domain([], acc), do: acc
 
