@@ -4,6 +4,7 @@
 
 
 ## Installation
+Optionally, you can [run the application with Docker](#running-the-app-with-docker).
 1. Install Erlang 20.0 or later
 2. Install Elixir 1.9+
 3. Run `make`
@@ -12,8 +13,15 @@
 In the root folder, run `make test`
 
 ## Running the app locally
-Run `make run`
+Run `make start`
 
+## Running the app with Docker
+1. Install Docker
+2. Run `make docker-image`
+3. Run `make start-with-docker`
+
+Also, you can pass the port when starting with docker:
+`PORT=7777 make start-with-docker`
 
 ## Endpoints
 `POST /plans`: Creates an execution plan based on tasks and its dependencies. See this [payload example](priv/successful_tasks.json).

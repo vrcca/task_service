@@ -1,3 +1,5 @@
+PORT?=4001
+
 .PHONY: test
 
 build: dependencies
@@ -14,3 +16,12 @@ dependencies:
 
 start:
 	mix run --no-halt
+
+release:
+	mix release
+
+docker-image:
+	docker build -t task-service .
+
+start-with-docker:
+	docker run --publish $(PORT):$(PORT) --env PORT=$(PORT) task-service:latest
