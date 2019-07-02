@@ -18,9 +18,11 @@ Run `make run`
 ## Endpoints
 `POST /plans`: Creates an execution plan based on tasks and its dependencies. See this [payload example](priv/successful_tasks.json).
 
+You can change the `Accept` header to `application/json` or omit it to receive a JSON response.
+
 ## Manual testing
 
-In the `priv/` folder there are json files to that you can use to run a few scenarios. You can change the `Accept` header to `application/json` or omit it to receive a JSON response.
+In the `priv/` folder are json files to that you can use to run a some scenarios.
 
 Here are the commands that you can use for the scenarios:
 
