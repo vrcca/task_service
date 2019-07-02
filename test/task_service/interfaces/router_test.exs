@@ -57,7 +57,7 @@ defmodule TaskService.Interfaces.RouterTest do
       |> Router.call(@opts)
 
     assert conn.status == 400
-    assert conn.resp_body =~ "nil task list"
+    assert to_map(conn.resp_body) == %{"error" => "nil task list"}
   end
 
   test "POST /plans returns 400 for invalid tasks" do
@@ -67,6 +67,7 @@ defmodule TaskService.Interfaces.RouterTest do
       :post
       |> conn("/plans", to_json(tasks))
       |> put_json_header()
+      |> put_req_header("accept", "text/plain")
       |> Router.call(@opts)
 
     assert conn.status == 400

@@ -24,7 +24,9 @@ defmodule TaskService.Interfaces.Router do
          body <- TasksResponseConverter.convert(conn, plan) do
       send_resp(conn, 201, body)
     else
-      {:error, reason} -> send_resp(conn, 400, reason)
+      {:error, reason} ->
+        response = TasksResponseConverter.convert(conn, %{error: reason})
+        send_resp(conn, 400, response)
     end
   end
 

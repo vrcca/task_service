@@ -1,8 +1,4 @@
 defmodule TaskService.Interfaces.TasksResponseConverter do
-  def convert(%Plug.Conn{}, error = {:error, _reason}) do
-    error
-  end
-
   def convert(conn = %Plug.Conn{}, plans) do
     plans
     |> to_response(requires_plain_response_type?(conn))
@@ -15,7 +11,9 @@ defmodule TaskService.Interfaces.TasksResponseConverter do
     end)
   end
 
-  defp to_response(error = {:error, _reason}, _type), do: error
+  defp to_response(%{error: reason}, _requires_plain = true) do
+    "Error: #{reason}"
+  end
 
   defp to_response(plan, _requires_plain = true) do
     """

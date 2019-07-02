@@ -20,7 +20,8 @@ defmodule Fixtures do
     |> put_req_header("accept", "text/plain")
   end
 
-  def to_json(body), do: Jason.encode!(body)
+  def to_json(term), do: Jason.encode!(term)
+  def to_map(json), do: Jason.decode!(json)
   def with_no_dependencies(task), do: Map.delete(task, :requires)
 
   def put_json_header(conn) do
