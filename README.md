@@ -24,12 +24,12 @@ In the `priv/` folder there are json files to that you can use to run a few scen
 
 Here are the commands that you can use for the scenarios:
 
-1. Successful bash plan from task json
+**Successful bash plan from task json**
 ```
 curl -H "Content-Type: application/json" -H "Accept: text/plain" -d @sucessful_tasks.json  http://localhost:4001/plans
 ```
 
-2. Cyclic dependency error
+**Cyclic dependency error**
 ```
 curl -H "Content-Type: application/json" -H "Accept: text/plain" -d @invalid_tasks.json  http://localhost:4001/plans
 ```
