@@ -12,3 +12,10 @@
 I decided to call the endpoints as `/plans`, because you "create" an execution plan when you pass the tasks to `POST /plans`. Thus, returning the execution plan to the user.
 
 The `/plans` endpoint decides the response type based on `accept`, otherwise returns json. Therefore, the bash script needs to pass `Accept: text/plain` as request header.
+
+
+## Deployment
+
+We should deploy this with a minimum of 2 instances, max 10. It should be behind a load balancer and API gateway.
+
+A Dockerfile is provided with instructions on how to build the app for production. The port can be changed with the PORT environment variable.
