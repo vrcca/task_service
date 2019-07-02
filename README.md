@@ -2,6 +2,7 @@
 
 **Generates an execution plan based on tasks and its dependencies.**
 
+Assumptions about this project can be found at [ASSUMPTIONS.md](ASSUMPTIONS.md).
 
 ## Installation
 Optionally, you can [run the application with Docker](#running-the-app-with-docker).
