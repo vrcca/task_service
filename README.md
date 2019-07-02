@@ -1,6 +1,6 @@
 # Task Service
 
-**Generates tasks based on tasks dependencies.**
+**Generates an execution plan based on tasks and its dependencies.**
 
 
 ## Installation
@@ -14,6 +14,9 @@ In the root folder, run `make test`
 ## Running the app locally
 Run `make run`
 
+
+## Endpoints
+`POST /plans`: Creates an execution plan based on tasks and its dependencies. See this [payload example](priv/successful_tasks.json).
 
 ## Manual testing
 
